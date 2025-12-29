@@ -20,11 +20,15 @@ export function getEcho() {
   }
 
   if (!echoInstance) {
-    const host = import.meta.env.VITE_REVERB_HOST || '127.0.0.1';
+    let host = import.meta.env.VITE_REVERB_HOST || '127.0.0.1';
+    // Force 127.0.0.1 si localhost pour éviter les problèmes IPv6 (::1)
+    if (host === 'localhost') {
+      host = '127.0.0.1';
+    }
     const port = import.meta.env.VITE_REVERB_PORT || 8080;
     const key = import.meta.env.VITE_REVERB_APP_KEY || 'ed4eza2mxs93z350tsgy';
     const scheme = import.meta.env.VITE_REVERB_SCHEME || 'http';
-    
+
     // Déterminer si on est en production (HTTPS)
     const isProduction = scheme === 'https';
     const wsPort = isProduction ? 443 : parseInt(port);
@@ -72,6 +76,9 @@ export function getEcho() {
 
     echoInstance.connector.pusher.connection.bind('error', (error) => {
       console.error('[Echo] Erreur de connexion:', error);
+      if (error && error.data) {
+        console.error('[Echo] Détails de l\'erreur:', JSON.stringify(error.data, null, 2));
+      }
     });
   }
 
