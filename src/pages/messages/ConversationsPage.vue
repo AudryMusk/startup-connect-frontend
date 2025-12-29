@@ -538,20 +538,26 @@ function setupRealtimeSubscription(userId) {
 
 // Handle realtime message updates
 async function handleRealtimeMessage(message, type = 'insert') {
-  console.log('Handling realtime message:', { message, type });
-  console.log('Debug Realtime:', {
-    authUserId: authUser.value?.id,
-    selectedUserId: selectedUser.value?.id,
+  console.group('🔔 [ConversationsPage] Realtime Event Received');
+  console.log('Event Type:', type);
+  console.log('Message Payload:', message);
+  
+  const currentAuthId = authUser.value?.id;
+  const currentSelectedId = selectedUser.value?.id;
+  
+  console.log('Context:', {
+    authUserId: currentAuthId,
+    selectedUserId: currentSelectedId,
     messageSenderId: message.sender_id,
-    messageReceiverId: message.receiver_id,
-    type
+    messageReceiverId: message.receiver_id
   });
 
-  // Explicit check for conversation match
-  const isSenderSelected = message.sender_id == selectedUser.value?.id;
-  const isReceiverSelected = message.receiver_id == selectedUser.value?.id;
-  const isSenderMe = message.sender_id == authUser.value?.id;
-  const isReceiverMe = message.receiver_id == authUser.value?.id;
+  // Explicit check for conversation match with loose equality for ID comparison
+  // (IDs might be strings from JSON or numbers from DB)
+  const isSenderSelected = message.sender_id == currentSelectedId;
+  const isReceiverSelected = message.receiver_id == currentSelectedId;
+  const isSenderMe = message.sender_id == currentAuthId;
+  const isReceiverMe = message.receiver_id == currentAuthId;
 
   // It's the current conversation if:
   // 1. I received it from the selected user (Sender=Selected, Receiver=Me)
@@ -559,11 +565,11 @@ async function handleRealtimeMessage(message, type = 'insert') {
   const isCurrentConversation = (isSenderSelected && isReceiverMe) || (isSenderMe && isReceiverSelected);
 
   // Fallback: If authUser is missing (rare), assume if sender is selected user, it's for us
-  const isFallbackMatch = !authUser.value?.id && isSenderSelected;
+  const isFallbackMatch = !currentAuthId && isSenderSelected;
 
   const shouldUpdate = isCurrentConversation || isFallbackMatch;
 
-  console.log('Debug Realtime Logic:', {
+  console.log('Logic Check:', {
     isSenderSelected,
     isReceiverSelected,
     isSenderMe,
@@ -572,47 +578,71 @@ async function handleRealtimeMessage(message, type = 'insert') {
     shouldUpdate
   });
 
-  const otherUserId = message.sender_id == authUser.value?.id ? message.receiver_id : message.sender_id;
+  const otherUserId = message.sender_id == currentAuthId ? message.receiver_id : message.sender_id;
 
   if (type === 'insert') {
     // 1. Update current conversation if open
     if (shouldUpdate) {
+      console.log('✅ Updating current conversation UI');
       const exists = currentMessages.value.find(m => m.id == message.id);
       if (!exists) {
+        // Ensure reactivity by creating a new array reference if needed, 
+        // but push is usually reactive in Vue 3 refs.
+        // We add the message and force a trigger if needed.
         currentMessages.value.push(message);
+        
+        // Also update store to keep sync
         messagesStore.addRealtimeMessage(message);
-        nextTick(() => scrollToBottom());
+        
+        nextTick(() => {
+          scrollToBottom();
+          console.log('📜 Scrolled to bottom');
+        });
+      } else {
+        console.log('⚠️ Message already exists in UI, skipping add');
       }
 
-      // Mark as read if current conversation
-      if (message.sender_id != authUser.value.id) {
+      // Mark as read if current conversation and received from other
+      if (message.sender_id != currentAuthId) {
+        console.log('👀 Marking message as read');
         messagesStore.markAsRead([message.id]).catch(console.error);
       }
+    } else {
+      console.log('❌ Not current conversation, skipping UI update');
     }
 
     // 2. Update conversation list (global)
+    console.log('🔄 Updating conversation list sidebar');
     await updateConversationList(message, otherUserId);
 
   } else if (type === 'update') {
     if (shouldUpdate) {
+      console.log('✏️ Updating message in UI');
       const index = currentMessages.value.findIndex(m => m.id == message.id);
-      if (index !== -1) currentMessages.value[index] = message;
+      if (index !== -1) {
+        currentMessages.value[index] = { ...currentMessages.value[index], ...message };
+      }
     }
     updateConversationLocally(message);
   } else if (type === 'delete') {
     if (shouldUpdate) {
+      console.log('🗑️ Removing message from UI');
       const index = currentMessages.value.findIndex(m => m.id == message.id);
       if (index !== -1) currentMessages.value.splice(index, 1);
     }
   } else if (type === 'read') {
     const { message_ids, user_id, read_at } = message;
-    if (selectedUser.value?.id == user_id) {
+    // If the read receipt is from the selected user (meaning they read MY messages)
+    if (currentSelectedId == user_id) {
+      console.log('✓ Updating read receipts');
       message_ids.forEach(id => {
         const msg = currentMessages.value.find(m => m.id == id);
         if (msg) msg.read_at = read_at;
       });
     }
   }
+  
+  console.groupEnd();
 }
 
 // Update conversation list (add if new, update if exists)
