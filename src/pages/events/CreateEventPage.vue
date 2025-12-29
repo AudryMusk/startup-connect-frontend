@@ -318,7 +318,7 @@ const handleSubmit = async () => {
     const eventData = {
       title: formData.title,
       description: formData.description,
-      date_event: formData.date_event ? new Date(formData.date_event).toISOString() : null,
+      date_event: formData.date_event || null, // Format datetime-local: YYYY-MM-DDTHH:mm
       lieu: formData.lieu || null,
       places_total: formData.places_total ? parseInt(formData.places_total) : null,
       max_seats_per_startup: formData.max_seats_per_startup ? parseInt(formData.max_seats_per_startup) : 1,

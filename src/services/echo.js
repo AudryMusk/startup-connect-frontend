@@ -40,15 +40,19 @@ export function getEcho() {
     });
 
     echoInstance = new Echo({
-      broadcaster: 'reverb',
+      broadcaster: 'pusher',
       key: key,
       wsHost: host,
       wsPort: wsPort,
       wssPort: wssPort,
-      forceTLS: isProduction,
-      enabledTransports: isProduction ? ['wss'] : ['ws'],
+      httpHost: host,
+      httpPort: wsPort,
+      cluster: 'mt1',
+      encrypted: isProduction,
       disableStats: true,
-      authEndpoint: `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/broadcasting/auth`,
+      enabledTransports: isProduction ? ['ws', 'wss'] : ['ws'],
+      forceTLS: isProduction,
+      authEndpoint: `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/broadcasting/auth`,
       auth: {
         headers: {
           Authorization: `Bearer ${authStore.token}`,

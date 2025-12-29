@@ -124,17 +124,30 @@ export const useEventsStore = defineStore('events', () => {
       if (images.length > 0) {
         const formData = new FormData();
 
-        // Ajouter les données textuelles
+        // Ajouter les données textuelles avec conversion appropriée
+        // Exclure 'images' car on le gère séparément
         Object.entries(eventData).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && value !== '') {
+          // Skip 'images' - on le gère en dehors de cette boucle
+          if (key === 'images' || key === 'image') {
+            return;
+          }
+          
+          if (value === null || value === undefined || value === '') {
+            return; // Skip null/undefined/empty values
+          }
+          
+          // Convertir les booléens en 1/0 pour FormData
+          if (typeof value === 'boolean') {
+            formData.append(key, value ? '1' : '0');
+          } else {
             formData.append(key, value);
           }
         });
 
-        // Ajouter les images
-        images.forEach((file, index) => {
-          formData.append(`images[${index}]`, file);
-        });
+        // Ajouter l'image (une seule pour les événements) avec le bon nom de champ
+        if (images[0]) {
+          formData.append('image', images[0]);
+        }
 
         response = await eventsApi.createWithImages(formData);
       } else {
@@ -172,15 +185,30 @@ export const useEventsStore = defineStore('events', () => {
       if (images.length > 0) {
         const formData = new FormData();
 
+        // Ajouter les données textuelles avec conversion appropriée
+        // Exclure 'images' car on le gère séparément
         Object.entries(eventData).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && value !== '') {
+          // Skip 'images' - on le gère en dehors de cette boucle
+          if (key === 'images' || key === 'image') {
+            return;
+          }
+          
+          if (value === null || value === undefined || value === '') {
+            return; // Skip null/undefined/empty values
+          }
+          
+          // Convertir les booléens en 1/0 pour FormData
+          if (typeof value === 'boolean') {
+            formData.append(key, value ? '1' : '0');
+          } else {
             formData.append(key, value);
           }
         });
 
-        images.forEach((file, index) => {
-          formData.append(`images[${index}]`, file);
-        });
+        // Ajouter l'image (une seule pour les événements) avec le bon nom de champ
+        if (images[0]) {
+          formData.append('image', images[0]);
+        }
 
         response = await eventsApi.updateWithImages(id, formData);
       } else {

@@ -77,7 +77,7 @@
     <div class="mb-3 md:mb-4">
       <h3 v-if="post.title" class="text-base sm:text-lg md:text-xl font-bold text-neutral-900 mb-1.5 sm:mb-2">{{
         post.title
-      }}</h3>
+        }}</h3>
       <p class="text-xs sm:text-sm md:text-base text-neutral-700 whitespace-pre-wrap leading-relaxed">{{ post.content }}
       </p>
     </div>
@@ -194,7 +194,7 @@
                 :disabled="editForm.existingImages.length + editForm.newImages.length >= 5" />
             </label>
             <p class="text-[10px] text-neutral-500 mt-1">{{ editForm.existingImages.length + editForm.newImages.length
-              }}/5
+            }}/5
               images</p>
           </div>
 
@@ -249,13 +249,24 @@ const editForm = ref({
 const postAuthorId = computed(
   () => props.post.author?.id || props.post.user_id || props.post.authorId,
 )
-const postAuthorName = computed(
-  () =>
-    props.post.author?.name ||
+const postAuthorName = computed(() => {
+  const name = props.post.author?.name ||
     props.post.author_name ||
     props.post.organizationName ||
-    'Utilisateur',
-)
+    'Utilisateur'
+
+  // Ajouter le nom de la startup/organisation entre parenthèses
+  const startupName = props.post.startup?.nom || props.post.startup?.name
+  const orgName = props.post.organization?.name || props.post.organisation?.nom
+
+  if (startupName) {
+    return `${name} (${startupName})`
+  } else if (orgName) {
+    return `${name} (${orgName})`
+  }
+
+  return name
+})
 const postAuthorRole = computed(
   () => props.post.author?.role || props.post.organizationType || 'startuper',
 )

@@ -37,10 +37,8 @@
             <Icon :name="item.icon" :size="18" class="hidden lg:inline" />
             <span class="hidden lg:inline">{{ item.label }}</span>
             <!-- Badge pour compteurs dynamiques -->
-            <span
-              v-if="item.badge && typeof item.badge === 'function' && item.badge() > 0"
-              class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white"
-            >
+            <span v-if="item.badge && typeof item.badge === 'function' && item.badge() > 0"
+              class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white">
               {{ item.badge() > 9 ? '9+' : item.badge() }}
             </span>
           </router-link>
@@ -124,10 +122,8 @@
           <Icon :name="item.icon" :size="20" class="hidden sm:inline" />
           <span class="text-[9px] sm:text-[10px] font-bold leading-tight">{{ item.label }}</span>
           <!-- Badge pour messages -->
-          <span
-            v-if="item.badge && typeof item.badge === 'function' && item.badge() > 0"
-            class="absolute top-0 right-1 min-w-[14px] h-[14px] px-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center border border-white"
-          >
+          <span v-if="item.badge && typeof item.badge === 'function' && item.badge() > 0"
+            class="absolute top-0 right-1 min-w-[14px] h-[14px] px-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center border border-white">
             {{ item.badge() > 9 ? '9+' : item.badge() }}
           </span>
         </router-link>
@@ -253,29 +249,38 @@ const baseNavItems = [
 const navItems = computed(() => {
   const items = [...baseNavItems]
   if (user.value?.role === 'admin') {
-    items.push({ id: 'admin', label: 'Admin', icon: 'ShieldAlert', path: '/admin', badge: null })
+    // Pour l'admin, placer l'onglet Admin en premier
+    return [
+      { id: 'admin', label: 'Admin', icon: 'ShieldAlert', path: '/admin', badge: null },
+      ...items
+    ]
   }
   return items
 })
 
 const mobileNavItems = computed(() => {
-  const items = [
+  if (user.value?.role === 'admin') {
+    // Pour l'admin, placer l'onglet Admin en premier
+    return [
+      { id: 'admin', label: 'Admin', icon: 'ShieldAlert', path: '/admin', badge: null },
+      { id: 'home', label: 'Accueil', icon: 'LayoutDashboard', path: '/', badge: null },
+      { id: 'startups', label: 'Startups', icon: 'Building2', path: '/startups', badge: null },
+      { id: 'offers', label: 'Offres', icon: 'Briefcase', path: '/offers', badge: null },
+      { id: 'events', label: 'Événements', icon: 'Calendar', path: '/events', badge: null },
+    ]
+  }
+  return [
     { id: 'home', label: 'Accueil', icon: 'LayoutDashboard', path: '/', badge: null },
     { id: 'startups', label: 'Startups', icon: 'Building2', path: '/startups', badge: null },
     { id: 'offers', label: 'Offres', icon: 'Briefcase', path: '/offers', badge: null },
     { id: 'events', label: 'Événements', icon: 'Calendar', path: '/events', badge: null },
-  ]
-  if (user.value?.role === 'admin') {
-    items.push({ id: 'admin', label: 'Admin', icon: 'ShieldAlert', path: '/admin', badge: null })
-  } else {
-    items.push({
+    {
       id: 'messages',
       label: 'Messages',
       icon: 'MessageSquare',
       path: '/messages',
       badge: () => unreadMessages.value
-    })
-  }
-  return items
+    },
+  ]
 })
 </script>

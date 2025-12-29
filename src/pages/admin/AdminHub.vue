@@ -75,6 +75,38 @@
               </div>
             </div>
           </Card>
+
+          <!-- Actions Card -->
+          <Card>
+            <template #header>
+              <h4 class="text-sm font-semibold text-neutral-700">Actions rapides</h4>
+            </template>
+            <div class="space-y-2">
+              <router-link to="/offers/create"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+                <div
+                  class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Icon name="Briefcase" :size="20" class="text-blue-600" />
+                </div>
+                <div>
+                  <p class="font-medium text-neutral-900">Publier une offre</p>
+                  <p class="text-xs text-neutral-500">Nouvelle opportunité</p>
+                </div>
+              </router-link>
+
+              <router-link to="/events/create"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+                <div
+                  class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <Icon name="Calendar" :size="20" class="text-purple-600" />
+                </div>
+                <div>
+                  <p class="font-medium text-neutral-900">Créer un événement</p>
+                  <p class="text-xs text-neutral-500">Organiser une rencontre</p>
+                </div>
+              </router-link>
+            </div>
+          </Card>
         </aside>
 
         <!-- Main Content Area -->
@@ -87,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Card, Badge, Icon } from '@/components/ui'
 import adminApi from '@/services/admin'
@@ -145,6 +177,14 @@ const menuItems = [
     icon: 'Building2',
     bgColor: 'bg-emerald-100',
     iconColor: 'text-emerald-600',
+  },
+  {
+    path: '/admin/partners',
+    label: 'Partenaires',
+    description: 'Gestion des partenaires',
+    icon: 'Briefcase',
+    bgColor: 'bg-amber-100',
+    iconColor: 'text-amber-600',
   },
   {
     path: '/admin/logs',

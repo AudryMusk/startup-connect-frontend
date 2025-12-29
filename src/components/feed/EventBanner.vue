@@ -24,10 +24,13 @@
           <!-- Icône pulsante -->
           <div class="relative flex-shrink-0">
             <div
-              class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/30 shadow-lg">
-              <Icon name="CalendarClock" :size="20" class="sm:hidden text-white" />
-              <Icon name="CalendarClock" :size="24" class="hidden sm:block md:hidden text-white" />
-              <Icon name="CalendarClock" :size="28" class="hidden md:block text-white" />
+              class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/30 shadow-lg overflow-hidden">
+              <img v-if="eventImage" :src="eventImage" alt="Image de l'événement" class="w-full h-full object-cover" />
+              <span v-else>
+                <Icon name="CalendarClock" :size="20" class="sm:hidden text-white" />
+                <Icon name="CalendarClock" :size="24" class="hidden sm:block md:hidden text-white" />
+                <Icon name="CalendarClock" :size="28" class="hidden md:block text-white" />
+              </span>
             </div>
             <!-- Pulse animation -->
             <!-- <span class="absolute -top-1 -right-1 flex h-3 w-3 sm:h-4 sm:w-4">
@@ -44,25 +47,31 @@
                 class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-black/50 backdrop-blur-xl text-white">
                 <Icon name="Sparkles" :size="10" class="mr-0.5 sm:mr-1 sm:hidden" />
                 <Icon name="Sparkles" :size="12" class="mr-1 hidden sm:inline" />
-                <span class="hidden xs:inline">PROCHAIN ÉVÉNEMENT</span>
-                <span class="xs:hidden">PROCHAIN</span>
+                <span class="hidden xs:inline">STARTUP-CONNECT ÉVÉNEMENT</span>
+                <span class="xs:hidden">STARTUP-CONNECT</span>
               </span>
             </div>
             <h3
               class="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white leading-tight truncate sm:whitespace-normal">
               {{ eventName }}
             </h3>
-            <p class="text-white/80 text-xs sm:text-sm md:text-base font-medium mt-0.5 truncate sm:whitespace-normal">
-              <Icon name="MapPin" :size="12" class="inline mr-0.5 sm:mr-1 sm:hidden" />
-              <Icon name="MapPin" :size="14" class="inline mr-1 hidden sm:inline" />
-              {{ formattedDate }}
-            </p>
+            <div class="flex flex-col gap-0.5">
+              <span class="flex items-center text-white/80 text-xs sm:text-sm md:text-base font-medium">
+                <Icon name="MapPin" :size="12" class="inline mr-0.5 sm:mr-1 sm:hidden" />
+                <Icon name="MapPin" :size="14" class="inline mr-1 hidden sm:inline" />
+                {{ props.eventLocation || 'Lieu à venir' }}
+              </span>
+            </div>
           </div>
         </div>
 
         <!-- Partie droite: Countdown -->
-        <div class="flex items-center gap-1.5 sm:gap-2 md:gap-3 justify-center lg:justify-end flex-wrap">
-          <!-- Jours -->
+        <div class="flex flex-col items-center justify-center">
+          <div class="flex items-center justify-center mb-2 ">
+            <Icon name="CalendarClock" :size="18" class="text-white mr-2" />
+            <span class="text-white/90 text-sm sm:text-base font-semibold block">{{ formattedDate }}</span>
+          </div>
+          <div class="flex items-center gap-1.5 sm:gap-2 md:gap-3 justify-center flex-wrap w-full">
           <div
             class="text-center px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-3 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/20 min-w-[50px] sm:min-w-[60px] md:min-w-[70px]">
             <p class="text-xl sm:text-2xl md:text-3xl font-black text-white leading-none">{{ countdown.days }}</p>
@@ -108,6 +117,7 @@
           </router-link>
         </div>
       </div>
+      </div>
 
       <!-- Bouton CTA Mobile -->
       <router-link :to="eventLink"
@@ -144,8 +154,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, toRefs } from 'vue'
 import { Icon } from '../ui'
+import { CalendarClock } from 'lucide-vue-next';
 
 const props = defineProps({
   eventId: {
@@ -164,11 +175,18 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  eventImage: {
+    type: String,
+    default: '',
+  },
   isLoading: {
     type: Boolean,
     default: false,
   },
 })
+
+// Extraire eventImage en ref pour l'utiliser directement dans le template
+const { eventImage } = toRefs(props)
 
 // Lien vers l'événement spécifique
 const eventLink = computed(() => {

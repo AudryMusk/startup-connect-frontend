@@ -10,10 +10,8 @@
 
   <div v-else class="max-w-6xl mx-auto space-y-4 md:space-y-6 px-4 md:px-0 py-8">
     <!-- Back Button -->
-    <button
-      @click="router.back()"
-      class="flex items-center gap-1.5 md:gap-2 text-gray-600 hover:text-theme transition text-sm md:text-base"
-    >
+    <button @click="router.back()"
+      class="flex items-center gap-1.5 md:gap-2 text-gray-600 hover:text-theme transition text-sm md:text-base">
       <Icon name="ChevronLeft" :size="18" />
       <span class="font-medium">Retour</span>
     </button>
@@ -27,12 +25,11 @@
       <div class="px-4 md:px-8 pb-4 md:pb-8">
         <!-- Logo -->
         <div
-          class="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-12 md:-mt-16 mb-4 md:mb-6 gap-3 sm:gap-0"
-        >
+          class="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-12 md:-mt-16 mb-4 md:mb-6 gap-3 sm:gap-0">
           <div
-            class="w-24 h-24 md:w-32 md:h-32 bg-white rounded-xl md:rounded-2xl shadow-xl flex items-center justify-center border-4 border-white overflow-hidden"
-          >
-            <img v-if="organization.logo_url" :src="getImageUrl(organization.logo_url)" :alt="organization.name" class="w-full h-full object-cover" />
+            class="w-24 h-24 md:w-32 md:h-32 bg-white rounded-xl md:rounded-2xl shadow-xl flex items-center justify-center border-4 border-white overflow-hidden">
+            <img v-if="organization.logo_url" :src="getImageUrl(organization.logo_url)" :alt="organization.name"
+              class="w-full h-full object-cover" />
             <span v-else class="text-3xl md:text-4xl font-bold text-blue-600">
               {{ organization.name[0] }}
             </span>
@@ -60,9 +57,7 @@
                 </h1>
                 <Badge color="blue" variant="outline">Organisation</Badge>
               </div>
-              <div
-                class="flex flex-wrap items-center gap-2 md:gap-4 text-sm md:text-base text-gray-600"
-              >
+              <div class="flex flex-wrap items-center gap-2 md:gap-4 text-sm md:text-base text-gray-600">
                 <span v-if="organization.city" class="flex items-center gap-1">
                   <Icon name="MapPin" :size="14" />
                   {{ organization.city }}, {{ organization.country }}
@@ -108,19 +103,14 @@
           </p>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div
-              v-for="member in members"
-              :key="member.id"
+            <div v-for="member in members" :key="member.id"
               class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition"
-              @click="router.push(`/users/${member.id}`)"
-            >
+              @click="router.push(`/users/${member.id}`)">
               <div v-if="member.photo" class="w-12 h-12 rounded-full overflow-hidden">
                 <img :src="getImageUrl(member.photo)" :alt="member.name" class="w-full h-full object-cover" />
               </div>
-              <div
-                v-else
-                class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold"
-              >
+              <div v-else
+                class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
                 {{ member.name?.[0] || '?' }}
               </div>
               <div class="flex-1 min-w-0">
@@ -173,15 +163,20 @@
         </Card>
 
         <!-- Actions -->
-        <!-- <Card>
+        <Card>
           <h3 class="font-bold mb-4">Actions</h3>
           <div class="space-y-2">
+            <Button variant="outline" class="w-full justify-start" @click="sendMessageToOwner"
+              :disabled="!organizationOwner || organizationOwner.id === authStore.user?.id">
+              <Icon name="Mail" :size="16" />
+              Envoyer un message
+            </Button>
             <Button variant="outline" class="w-full justify-start" @click="shareProfile">
               <Icon name="Share" :size="16" />
               Partager le profil
             </Button>
           </div>
-        </Card> -->
+        </Card>
       </div>
     </div>
   </div>
@@ -216,6 +211,12 @@ const isOwner = computed(() => {
   if (!organization.value || !authStore.user) return false
   // Check if current user is owner of this organization
   return members.value.some(m => m.id === authStore.user.id && m.role === 'owner')
+})
+
+// Trouver l'owner de l'organisation
+const organizationOwner = computed(() => {
+  const owner = members.value.find(m => m.role === 'owner')
+  return owner || members.value[0] || null
 })
 
 const loadData = async () => {
@@ -255,6 +256,23 @@ const editOrganization = () => {
 const shareProfile = () => {
   navigator.clipboard.writeText(window.location.href)
   toast.success('Lien copié dans le presse-papier')
+}
+
+// Envoyer un message au propriétaire de l'organisation
+const sendMessageToOwner = () => {
+  if (!organizationOwner.value) {
+    toast.error('Impossible de trouver le propriétaire de cette organisation')
+    return
+  }
+
+  if (!authStore.user) {
+    toast.error('Vous devez être connecté pour envoyer un message')
+    router.push('/login')
+    return
+  }
+
+  // Rediriger vers la messagerie avec l'ID du propriétaire
+  router.push(`/messages?user=${organizationOwner.value.id}`)
 }
 
 const formatDate = (dateString) => {

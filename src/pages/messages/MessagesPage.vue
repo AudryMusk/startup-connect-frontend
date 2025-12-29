@@ -383,7 +383,24 @@ const showAvatar = (index) => {
 }
 
 const getUserName = (message) => {
-  return message.user?.name || message.user?.email || 'Utilisateur inconnu'
+  const userName = message.user?.name || message.user?.email || 'Utilisateur inconnu'
+
+  // Ajouter le nom de la startup/organisation entre parenthèses
+  const startupName = message.user?.startup?.nom ||
+    message.user?.startup?.name ||
+    message.startup?.nom
+
+  const orgName = message.user?.organization?.name ||
+    message.user?.organisation?.nom ||
+    message.organization?.name
+
+  if (startupName) {
+    return `${userName} (${startupName})`
+  } else if (orgName) {
+    return `${userName} (${orgName})`
+  }
+
+  return userName
 }
 
 const getMessageDate = (message) => {

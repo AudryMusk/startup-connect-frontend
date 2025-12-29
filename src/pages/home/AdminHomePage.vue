@@ -6,6 +6,7 @@
       :eventDate="nextEventDate"
       :eventName="nextEventName"
       :eventLocation="nextEventLocation"
+      :eventImage="featuredEvent.image || featuredEvent.banner || featuredEvent.cover || featuredEvent.image_url || featuredEvent.banner_url || featuredEvent.cover_url || featuredEvent.photo || (featuredEvent.photos && featuredEvent.photos[0]) || ''"
       :isLoading="loading"
     />
     <!-- Main Content -->
@@ -23,7 +24,7 @@
       <!-- Mobile Sidebar Drawer -->
       <div v-if="showMobileSidebar"
         class="lg:hidden space-y-4 mb-6 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
-        <EventCountdown :event-date="nextEventDate" :isLoading="loading" />
+        <!-- <EventCountdown :event-date="nextEventDate" :isLoading="loading" /> -->
         <div class="grid grid-cols-2 gap-2">
           <router-link to="/admin/moderation">
             <Button variant="outline" size="sm" class="w-full justify-start gap-2 relative">
@@ -320,7 +321,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { usePostsStore } from '@/stores/postsStore'
 import { Card, Button, Icon } from '@/components/ui'
-import { PostCard, EventCountdown } from '@/components/feed'
+import { PostCard } from '@/components/feed'
 import EventBanner from '../../components/feed/EventBanner.vue'
 import PostSkeleton from '@/components/skeletons/PostSkeleton.vue'
 import CreatePostModal from '@/components/modals/CreatePostModal.vue'

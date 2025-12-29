@@ -3,14 +3,14 @@
     <!-- Animated Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-theme-50 via-white to-brand-blue/10">
       <div
-        class="absolute top-0 -left-4 w-48 sm:w-72 h-48 sm:h-72 bg-brand-purple/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob"
-      ></div>
+        class="absolute top-0 -left-4 w-48 sm:w-72 h-48 sm:h-72 bg-brand-purple/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob">
+      </div>
       <div
-        class="absolute top-0 -right-4 w-48 sm:w-72 h-48 sm:h-72 bg-brand-pink/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"
-      ></div>
+        class="absolute top-0 -right-4 w-48 sm:w-72 h-48 sm:h-72 bg-brand-pink/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000">
+      </div>
       <div
-        class="absolute -bottom-8 left-20 w-48 sm:w-72 h-48 sm:h-72 bg-brand-blue/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"
-      ></div>
+        class="absolute -bottom-8 left-20 w-48 sm:w-72 h-48 sm:h-72 bg-brand-blue/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000">
+      </div>
     </div>
 
     <div class="w-full max-w-md relative z-10">
@@ -18,8 +18,7 @@
         <!-- Logo Section -->
         <div class="text-center mb-6 sm:mb-8 md:mb-10">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-brand-blue via-brand-purple to-brand-pink rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-soft-lg animate-scale-in"
-          >
+            class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-brand-blue via-brand-purple to-brand-pink rounded-2xl sm:rounded-3xl mb-4 sm:mb-6 shadow-soft-lg animate-scale-in">
             <span class="text-2xl sm:text-3xl font-black text-white">SC</span>
           </div>
           <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-neutral-900 mb-2 sm:mb-3">
@@ -40,11 +39,7 @@
         </Alert>
 
         <!-- Success Alert (Email verification) -->
-        <Alert
-          v-if="verificationMessage"
-          :type="verificationType"
-          class="mb-4 sm:mb-6 animate-fade-in"
-        >
+        <Alert v-if="verificationMessage" :type="verificationType" class="mb-4 sm:mb-6 animate-fade-in">
           {{ verificationMessage }}
         </Alert>
 
@@ -55,41 +50,21 @@
 
         <!-- Login Form -->
         <form @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-5">
-          <Input
-            label="Adresse email"
-            type="email"
-            placeholder="votre@email.com"
-            v-model="formData.email"
-            required
-          />
+          <Input label="Adresse email" type="email" placeholder="votre@email.com" v-model="formData.email" required />
 
-          <Input
-            label="Mot de passe"
-            type="password"
-            placeholder="••••••••"
-            v-model="formData.password"
-            required
-          />
+          <Input label="Mot de passe" type="password" placeholder="••••••••" v-model="formData.password" required />
 
-          <div
-            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-sm"
-          >
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-sm">
             <label class="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                v-model="formData.remember"
-                class="w-4 h-4 rounded border-neutral-300 text-theme-600 focus:ring-theme-500 transition-all cursor-pointer"
-              />
+              <input type="checkbox" v-model="formData.remember"
+                class="w-4 h-4 rounded border-neutral-300 text-theme-600 focus:ring-theme-500 transition-all cursor-pointer" />
               <span
-                class="text-neutral-600 font-medium group-hover:text-neutral-900 transition-colors text-xs sm:text-sm"
-              >
+                class="text-neutral-600 font-medium group-hover:text-neutral-900 transition-colors text-xs sm:text-sm">
                 Se souvenir de moi
               </span>
             </label>
-            <router-link
-              to="/forgot-password"
-              class="text-theme-700 hover:text-theme-900 font-semibold transition-colors text-xs sm:text-sm"
-            >
+            <router-link to="/forgot-password"
+              class="text-theme-700 hover:text-theme-900 font-semibold transition-colors text-xs sm:text-sm">
               Mot de passe oublié ?
             </router-link>
           </div>
@@ -102,10 +77,7 @@
         <div class="mt-6 sm:mt-8 text-center">
           <p class="text-xs sm:text-sm text-neutral-600 font-medium">
             Pas encore de compte ?
-            <router-link
-              to="/register"
-              class="text-theme-700 hover:text-theme-900 font-bold transition-colors ml-1"
-            >
+            <router-link to="/register" class="text-theme-700 hover:text-theme-900 font-bold transition-colors ml-1">
               Créer un compte
             </router-link>
           </p>
@@ -207,7 +179,15 @@ const handleSubmit = async () => {
     // Afficher message de succès
     toast.success(`Bienvenue ${authStore.userFullName} !`, 3000)
 
-    // Vérifier si l'utilisateur a un onboarding en attente
+    // L'admin ne doit JAMAIS être soumis à la finalisation de compte
+    // Si l'admin se connecte, nettoyer tout pendingOnboarding résiduel et rediriger vers le dashboard admin
+    if (authStore.isAdmin) {
+      localStorage.removeItem('pendingOnboarding')
+      setTimeout(() => router.push('/admin/dashboard'), 1000)
+      return
+    }
+
+    // Vérifier si l'utilisateur a un onboarding en attente (seulement pour non-admin)
     const pendingOnboarding = localStorage.getItem('pendingOnboarding')
 
     if (pendingOnboarding) {

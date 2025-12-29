@@ -77,7 +77,7 @@
                   'font-bold truncate text-base transition-colors',
                   selectedUser?.id === conv.user.id ? 'text-theme-700' : 'text-gray-900 group-hover:text-theme-600'
                 ]">
-                  {{ conv.user.name }}
+                  {{ formatUserDisplayName(conv.user) }}
                 </h3>
                 <span class="text-xs font-medium" :class="[
                   conv.unread_count > 0 ? 'text-theme-600' : 'text-gray-400'
@@ -159,7 +159,7 @@
                 </div>
               </div>
               <div class="text-left">
-                <h2 class="font-bold text-gray-900">{{ selectedUser.name }}</h2>
+                <h2 class="font-bold text-gray-900">{{ formatUserDisplayName(selectedUser) }}</h2>
                 <p class="text-xs text-gray-500 flex items-center gap-1">
                   <span v-if="selectedUser.is_online" class="inline-flex items-center gap-1 text-green-600 font-medium">
                     <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
@@ -820,6 +820,27 @@ function scrollToBottom() {
 function formatTimeAgo(date) {
   if (!date) return '';
   return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr });
+}
+
+// Format user name with startup/organization name
+function formatUserDisplayName(user) {
+  if (!user) return 'Utilisateur inconnu'
+
+  const userName = user.name || user.email || 'Utilisateur'
+
+  // Check for startup name
+  const startupName = user.startup?.nom || user.startup?.name
+
+  // Check for organization name
+  const orgName = user.organization?.name || user.organisation?.nom
+
+  if (startupName) {
+    return `${userName} (${startupName})`
+  } else if (orgName) {
+    return `${userName} (${orgName})`
+  }
+
+  return userName
 }
 
 function formatTime(date) {

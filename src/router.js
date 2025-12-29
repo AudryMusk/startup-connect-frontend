@@ -24,6 +24,7 @@ import OfferDetailPage from './pages/offers/OfferDetailPage.vue'
 // Pages d'événements
 import EventsPage from './pages/events/EventsPage.vue'
 import CreateEventPage from './pages/events/CreateEventPage.vue'
+import EditEventPage from './pages/events/EditEventPage.vue'
 import EventDetailPage from './pages/events/EventDetailPage.vue'
 
 // Home redirecteur selon rôle
@@ -45,6 +46,7 @@ import RCCMValidationPage from './pages/admin/RCCMValidationPage.vue'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.vue'
 import AdminUsersPage from './pages/admin/AdminUsersPage.vue'
 import AdminStartupsPage from './pages/admin/AdminStartupsPage.vue'
+import AdminPartnersPage from './pages/admin/AdminPartnersPage.vue'
 import AdminLogsPage from './pages/admin/AdminLogsPage.vue'
 
 // Pages d'organisations
@@ -150,6 +152,12 @@ const routes = [
     meta: { requiresLayout: true },
   },
   {
+    path: '/events/:id/edit',
+    name: 'EditEvent',
+    component: EditEventPage,
+    meta: { requiresLayout: true },
+  },
+  {
     path: '/events/:id',
     name: 'EventDetail',
     component: EventDetailPage,
@@ -207,6 +215,11 @@ const routes = [
         path: 'startups',
         name: 'AdminStartups',
         component: AdminStartupsPage,
+      },
+      {
+        path: 'partners',
+        name: 'AdminPartners',
+        component: AdminPartnersPage,
       },
       {
         path: 'logs',
@@ -312,13 +325,7 @@ const router = createRouter({
 // Navigation guard pour protéger les routes authentifiées
 router.beforeEach((to, from, next) => {
   // Routes publiques qui ne nécessitent pas d'authentification
-  const publicPages = [
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
-    '/welcome',
-  ]
+  const publicPages = ['/login', '/register', '/forgot-password', '/reset-password', '/welcome']
   const authRequired = !publicPages.includes(to.path)
 
   // Vérifier le token dans le localStorage

@@ -183,6 +183,9 @@
                   Vous n'avez pas encore associé de startup à votre compte.
                   Créez ou rejoignez une startup pour accéder à toutes les fonctionnalités.
                 </p>
+                <div v-if="isJoinRequested" class="mt-2">
+                  <Badge color="yellow" size="sm">Demande d'adhésion en attente</Badge>
+                </div>
               </div>
               <Button variant="gradient" @click="goToOnboarding" class="flex-shrink-0">
                 <Icon name="Rocket" :size="18" class="mr-2" />
@@ -400,6 +403,8 @@
 </template>
 
 <script setup>
+import startupApi from '@/services/startup'
+const isJoinRequested = ref(false)
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
@@ -470,6 +475,18 @@ async function loadUserProfile() {
         await authStore.fetchMe()
       }
       user.value = authStore.user
+      // Vérifier s'il y a une demande d'adhésion en attente
+      if (user.value.role === 'startuper' && !user.value.startup_id && !user.value.startup) {
+        try {
+          const { data: requests } = await startupApi.getMyJoinRequests()
+          const pendingRequest = (requests.data || requests || []).find(
+            (r) => r.status === 'pending',
+          )
+          isJoinRequested.value = !!pendingRequest
+        } catch (err) {
+          isJoinRequested.value = false
+        }
+      }
     } else {
       // Charger le profil d'un autre utilisateur
       const { data } = await usersApi.getById(userId.value)

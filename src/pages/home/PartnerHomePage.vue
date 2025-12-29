@@ -6,6 +6,7 @@
       :eventDate="nextEventDate"
       :eventName="nextEventName"
       :eventLocation="nextEventLocation"
+      :eventImage="featuredEvent.image || featuredEvent.banner || featuredEvent.cover || featuredEvent.image_url || featuredEvent.banner_url || featuredEvent.cover_url || featuredEvent.photo || (featuredEvent.photos && featuredEvent.photos[0]) || ''"
       :isLoading="loading"
     />
     <!-- Main Content -->
@@ -14,19 +15,28 @@
 
       <div class="lg:hidden flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold text-neutral-900">Fil d'actualité</h2>
-        <button @click="showMobileSidebar = !showMobileSidebar"
-          class="flex items-center gap-2 px-3 py-2 bg-brand-primary-50 text-brand-primary-700 rounded-lg text-sm font-medium">
+        <button
+          @click="showMobileSidebar = !showMobileSidebar"
+          class="flex items-center gap-2 px-3 py-2 bg-brand-primary-50 text-brand-primary-700 rounded-lg text-sm font-medium"
+        >
           <Icon :name="showMobileSidebar ? 'X' : 'LayoutGrid'" :size="16" />
           {{ showMobileSidebar ? 'Masquer' : 'Plus' }}
         </button>
       </div>
 
       <!-- Mobile Sidebar Drawer -->
-      <transition enter-active-class="transition-all duration-300 ease-out"
-        enter-from-class="opacity-0 transform -translate-y-4" enter-to-class="opacity-100 transform translate-y-0"
-        leave-active-class="transition-all duration-200 ease-in" leave-from-class="opacity-100 transform translate-y-0"
-        leave-to-class="opacity-0 transform -translate-y-4">
-        <div v-if="showMobileSidebar" class="lg:hidden mb-6 overflow-hidden">
+      <transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 transform -translate-y-4"
+        enter-to-class="opacity-100 transform translate-y-0"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 transform translate-y-0"
+        leave-to-class="opacity-0 transform -translate-y-4"
+      >
+        <div
+          v-if="showMobileSidebar"
+          class="lg:hidden mb-6 overflow-hidden"
+        >
           <!-- Header du drawer -->
           <div class="bg-gradient-to-br from-brand-primary-600 to-brand-primary-700 p-4 rounded-t-2xl">
             <h3 class="text-white font-bold text-lg flex items-center gap-2">
@@ -38,74 +48,60 @@
 
           <!-- Contenu du drawer -->
           <div class="bg-white rounded-b-2xl shadow-xl border-x border-b border-neutral-200 p-4 space-y-2">
-            <router-link to="/partner/offers/create"
-              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-primary-50 hover:to-brand-primary-100 transition-all duration-200 group border border-transparent hover:border-brand-primary-200">
-              <div
-                class="w-10 h-10 rounded-xl bg-brand-primary-100 flex items-center justify-center group-hover:bg-brand-primary-200 group-hover:scale-110 transition-all duration-200">
+            <router-link
+              to="/partner/offers/create"
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-primary-50 hover:to-brand-primary-100 transition-all duration-200 group border border-transparent hover:border-brand-primary-200"
+            >
+              <div class="w-10 h-10 rounded-xl bg-brand-primary-100 flex items-center justify-center group-hover:bg-brand-primary-200 group-hover:scale-110 transition-all duration-200">
                 <Icon name="Plus" :size="18" class="text-brand-primary-600" />
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-neutral-900 text-sm">Publier une opportunité</p>
                 <p class="text-xs text-neutral-500">Créer une nouvelle offre</p>
               </div>
-              <Icon name="ChevronRight" :size="16"
-                class="text-neutral-400 group-hover:text-brand-primary-600 transition-colors" />
+              <Icon name="ChevronRight" :size="16" class="text-neutral-400 group-hover:text-brand-primary-600 transition-colors" />
             </router-link>
 
-            <router-link to="/partner/offers"
-              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 transition-all duration-200 group border border-transparent hover:border-green-200">
-              <div
-                class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center group-hover:bg-green-200 group-hover:scale-110 transition-all duration-200">
+            <router-link
+              to="/partner/offers"
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 transition-all duration-200 group border border-transparent hover:border-green-200"
+            >
+              <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center group-hover:bg-green-200 group-hover:scale-110 transition-all duration-200">
                 <Icon name="Briefcase" :size="18" class="text-green-600" />
               </div>
               <div class="flex-1">
-                <p class="font-semibold text-neutral-900 text-sm">Mes opportunités</p>
+                <p class="font-semibold text-neutral-900 text-sm">Mes offres</p>
                 <p class="text-xs text-neutral-500">{{ stats.activeOffers }} offres actives</p>
               </div>
-              <Icon name="ChevronRight" :size="16"
-                class="text-neutral-400 group-hover:text-green-600 transition-colors" />
+              <Icon name="ChevronRight" :size="16" class="text-neutral-400 group-hover:text-green-600 transition-colors" />
             </router-link>
 
-            <router-link to="/partner/applications"
-              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 group border border-transparent hover:border-blue-200">
-              <div
-                class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-200">
+            <router-link
+              to="/partner/applications"
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 group border border-transparent hover:border-blue-200"
+            >
+              <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-200">
                 <Icon name="Users" :size="18" class="text-blue-600" />
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-neutral-900 text-sm">Candidatures reçues</p>
                 <p class="text-xs text-neutral-500">{{ stats.pendingApplications }} en attente</p>
               </div>
-              <Icon name="ChevronRight" :size="16"
-                class="text-neutral-400 group-hover:text-blue-600 transition-colors" />
+              <Icon name="ChevronRight" :size="16" class="text-neutral-400 group-hover:text-blue-600 transition-colors" />
             </router-link>
 
-            <router-link to="/partner/stats"
-              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-100 transition-all duration-200 group border border-transparent hover:border-amber-200">
-              <div
-                class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 group-hover:scale-110 transition-all duration-200">
-                <Icon name="BarChart2" :size="18" class="text-amber-600" />
-              </div>
-              <div class="flex-1">
-                <p class="font-semibold text-neutral-900 text-sm">Statistiques</p>
-                <p class="text-xs text-neutral-500">Performances</p>
-              </div>
-              <Icon name="ChevronRight" :size="16"
-                class="text-neutral-400 group-hover:text-amber-600 transition-colors" />
-            </router-link>
-
-            <router-link to="/startups"
-              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 transition-all duration-200 group border border-transparent hover:border-purple-200">
-              <div
-                class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 group-hover:scale-110 transition-all duration-200">
+            <router-link
+              to="/startups"
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 transition-all duration-200 group border border-transparent hover:border-purple-200"
+            >
+              <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 group-hover:scale-110 transition-all duration-200">
                 <Icon name="Building2" :size="18" class="text-purple-600" />
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-neutral-900 text-sm">Découvrir startups</p>
                 <p class="text-xs text-neutral-500">Trouver des talents</p>
               </div>
-              <Icon name="ChevronRight" :size="16"
-                class="text-neutral-400 group-hover:text-purple-600 transition-colors" />
+              <Icon name="ChevronRight" :size="16" class="text-neutral-400 group-hover:text-purple-600 transition-colors" />
             </router-link>
           </div>
         </div>
@@ -115,8 +111,12 @@
         <!-- Feed Section -->
         <div class="lg:col-span-2 space-y-4 md:space-y-6">
           <!-- Bouton Créer un post -->
-          <Button variant="gradient" size="lg" class="w-full justify-center gap-2 md:gap-3 text-sm md:text-base"
-            @click="showCreatePostModal = true">
+          <Button
+            variant="gradient"
+            size="lg"
+            class="w-full justify-center gap-2 md:gap-3 text-sm md:text-base"
+            @click="showCreatePostModal = true"
+          >
             <Icon name="Plus" :size="18" />
             <span class="hidden sm:inline">Publier une actualité</span>
             <span class="sm:hidden">Publier</span>
@@ -129,14 +129,23 @@
 
           <!-- Posts Feed -->
           <div v-else-if="posts.length > 0" class="space-y-6">
-            <PostCard v-for="post in posts" :key="post.id" :post="post" @edit="handleEditPost"
-              @delete="handleDeletePost" @report="handleReportPost" @comment-added="handleCommentAdded"
-              @comment-deleted="handleCommentDeleted" />
+            <PostCard
+              v-for="post in posts"
+              :key="post.id"
+              :post="post"
+              @edit="handleEditPost"
+              @delete="handleDeletePost"
+              @report="handleReportPost"
+              @comment-added="handleCommentAdded"
+              @comment-deleted="handleCommentDeleted"
+            />
           </div>
 
           <!-- Empty State -->
           <Card v-else class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-primary-100 flex items-center justify-center">
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-primary-100 flex items-center justify-center"
+            >
               <Icon name="FileText" :size="32" class="text-brand-primary-600" />
             </div>
             <h3 class="text-lg font-semibold text-neutral-900 mb-2">
@@ -150,7 +159,8 @@
 
         <!-- Sidebar - Hidden on mobile, sticky on desktop -->
         <aside
-          class="hidden lg:block lg:sticky lg:top-6 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-transparent">
+          class="hidden lg:block lg:sticky lg:top-6 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-transparent"
+        >
           <!-- Event Countdown -->
           <!-- <EventCountdown :event-date="nextEventDate" :isLoading="loading" /> -->
 
@@ -161,10 +171,13 @@
             </template>
 
             <nav class="space-y-1">
-              <router-link to="/partner/offers/create"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <router-link
+                to="/partner/offers/create"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-brand-primary-100 flex items-center justify-center group-hover:bg-brand-primary-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-brand-primary-100 flex items-center justify-center group-hover:bg-brand-primary-200 transition-colors"
+                >
                   <Icon name="Plus" :size="20" class="text-brand-primary-600" />
                 </div>
                 <div>
@@ -173,10 +186,13 @@
                 </div>
               </router-link>
 
-              <router-link to="/partner/offers"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <router-link
+                to="/partner/offers"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-theme-success-light flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-theme-success-light flex items-center justify-center group-hover:bg-green-200 transition-colors"
+                >
                   <Icon name="Briefcase" :size="20" class="text-theme-success" />
                 </div>
                 <div>
@@ -185,10 +201,13 @@
                 </div>
               </router-link>
 
-              <router-link to="/partner/applications"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <router-link
+                to="/partner/applications"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-theme-info-light flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-theme-info-light flex items-center justify-center group-hover:bg-blue-200 transition-colors"
+                >
                   <Icon name="Users" :size="20" class="text-theme-info" />
                 </div>
                 <div>
@@ -197,34 +216,43 @@
                 </div>
               </router-link>
 
-              <router-link to="/partner/stats"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <!-- <router-link
+                to="/partner/stats"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-theme-warning-light flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-theme-warning-light flex items-center justify-center group-hover:bg-amber-200 transition-colors"
+                >
                   <Icon name="BarChart2" :size="20" class="text-theme-warning" />
                 </div>
                 <div>
                   <p class="font-medium text-neutral-900">Statistiques</p>
                   <p class="text-sm text-neutral-500">Voir les performances</p>
                 </div>
-              </router-link>
+              </router-link> -->
 
-              <router-link to="/groups"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <!-- <router-link
+                to="/groups/create"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors"
+                >
                   <Icon name="UsersGroup" :size="20" class="text-purple-600" />
                 </div>
                 <div>
                   <p class="font-medium text-neutral-900">Créer un groupe</p>
                   <p class="text-sm text-neutral-500">Fédérer une communauté</p>
                 </div>
-              </router-link>
+              </router-link> -->
 
-              <router-link to="/messages"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <router-link
+                to="/messages"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors"
+                >
                   <Icon name="MessageSquare" :size="20" class="text-pink-600" />
                 </div>
                 <div>
@@ -233,38 +261,47 @@
                 </div>
               </router-link>
 
-              <router-link to="/startups"
-                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group">
+              <!-- <router-link
+                to="/startups"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+              >
                 <div
-                  class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition-colors">
+                  class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition-colors"
+                >
                   <Icon name="Search" :size="20" class="text-teal-600" />
                 </div>
                 <div>
                   <p class="font-medium text-neutral-900">Découvrir startups</p>
                   <p class="text-sm text-neutral-500">Trouver des talents</p>
                 </div>
-              </router-link>
+              </router-link> -->
             </nav>
           </Card>
 
           <!-- Recommended Startups -->
-          <Card v-if="recommendedStartups.length > 0">
+          <!-- <Card v-if="recommendedStartups.length > 0">
             <template #header>
               <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-neutral-900">Startups recommandées</h3>
-                <router-link to="/startups"
-                  class="text-sm text-brand-primary-600 hover:text-brand-primary-700 font-medium">
+                <router-link
+                  to="/startups"
+                  class="text-sm text-brand-primary-600 hover:text-brand-primary-700 font-medium"
+                >
                   Voir tout
                 </router-link>
               </div>
             </template>
 
             <div class="space-y-4">
-              <div v-for="startup in recommendedStartups.slice(0, 4)" :key="startup.id"
+              <div
+                v-for="startup in recommendedStartups.slice(0, 4)"
+                :key="startup.id"
                 class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors cursor-pointer"
-                @click="$router.push(`/startups/${startup.id}`)">
+                @click="$router.push(`/startups/${startup.id}`)"
+              >
                 <div
-                  class="h-12 w-12 rounded-lg bg-gradient-to-br from-brand-secondary-400 to-brand-secondary-600 flex items-center justify-center text-white font-bold">
+                  class="h-12 w-12 rounded-lg bg-gradient-to-br from-brand-secondary-400 to-brand-secondary-600 flex items-center justify-center text-white font-bold"
+                >
                   {{ startup.nom?.charAt(0) || 'S' }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -274,10 +311,12 @@
                 <Badge v-if="startup.verified" variant="success" size="sm"> Vérifié </Badge>
               </div>
             </div>
-          </Card>
+          </Card> -->
 
           <!-- Quick Stats Summary -->
-          <Card class="bg-gradient-to-br from-brand-primary-50 to-brand-primary-100 border-brand-primary-200">
+          <!-- <Card
+            class="bg-gradient-to-br from-brand-primary-50 to-brand-primary-100 border-brand-primary-200"
+          >
             <div class="text-center">
               <div class="text-3xl font-bold text-brand-primary-700">{{ stats.totalViews }}</div>
               <p class="text-sm text-brand-primary-600 mt-1">Vues ce mois</p>
@@ -287,24 +326,27 @@
                 </p>
               </div>
             </div>
-          </Card>
+          </Card> -->
         </aside>
       </div>
     </main>
   </div>
 
   <!-- Modal de création de post -->
-  <CreatePostModal :is-open="showCreatePostModal"
-    :organization-name="organization?.name || authStore.user?.name || 'Partenaire'" @close="showCreatePostModal = false"
-    @post-created="handlePostCreated" />
+  <CreatePostModal
+    :is-open="showCreatePostModal"
+    :organization-name="organization?.name || authStore.user?.name || 'Partenaire'"
+    @close="showCreatePostModal = false"
+    @post-created="handlePostCreated"
+  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { usePostsStore } from '@/stores/postsStore'
-import { Card, Button, Badge, Icon } from '@/components/ui'
-import { PostCard, EventCountdown } from '@/components/feed'
+import { Card, Button, Icon } from '@/components/ui'
+import { PostCard,  } from '@/components/feed'
 import EventBanner from '../../components/feed/EventBanner.vue'
 import PostSkeleton from '@/components/skeletons/PostSkeleton.vue'
 import CreatePostModal from '@/components/modals/CreatePostModal.vue'
@@ -314,6 +356,7 @@ import eventsApi from '@/services/events'
 const authStore = useAuthStore()
 const postsStore = usePostsStore()
 
+// Data
 const organization = ref(null)
 const organizationMembers = ref([])
 const recommendedStartups = ref([])
@@ -329,6 +372,7 @@ const nextEventDate = ref(null)
 const nextEventName = ref('Startup Connect Event')
 const nextEventLocation = ref('Cotonou, Bénin')
 
+// Computed
 const currentUserId = computed(() => authStore.user?.id)
 
 // Organisation ID depuis l'utilisateur connecté
@@ -342,6 +386,7 @@ const stats = computed(() => ({
   membersCount: organization.value?.members_count || organizationMembers.value.length || 0,
 }))
 
+// Methods
 const loadOrganization = async () => {
   // Essayer de charger l'organisation de l'utilisateur
   if (userOrganizationId.value) {
@@ -386,27 +431,10 @@ const handlePostCreated = async (postData) => {
 
 const handleEditPost = async (updatedPost) => {
   try {
-    // Construire le payload pour la mise à jour
-    const payload = {
-      title: updatedPost.title,
-      content: updatedPost.content,
-    }
-
-    // Si des nouvelles images sont présentes (fichiers), les ajouter
-    if (updatedPost.images && updatedPost.images.length > 0) {
-      payload.images = updatedPost.images
-    }
-
-    // Ajouter les IDs des images existantes à conserver
-    if (updatedPost.existing_images && updatedPost.existing_images.length > 0) {
-      payload.existing_images = updatedPost.existing_images
-    }
-
-    await postsStore.updatePost(updatedPost.id, payload)
+    await postsStore.updatePost(updatedPost.id, updatedPost)
     await loadPosts()
   } catch (error) {
     console.error('Error updating post:', error)
-    alert('Erreur lors de la modification du post')
   }
 }
 
@@ -446,7 +474,7 @@ const loadFeaturedEvent = async () => {
   try {
     const { data } = await eventsApi.getFeatured()
     const event = data.data
-    
+
     if (event) {
       featuredEvent.value = event
       nextEventDate.value = new Date(event.date_event).getTime()

@@ -164,12 +164,13 @@
         <p class="text-center text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-8">
           Ils nous font confiance
         </p>
-        <div class="flex flex-wrap items-center justify-center gap-8 sm:gap-16 opacity-60">
-          <div class="text-2xl font-black text-neutral-400">EPITECH</div>
-          <div class="text-2xl font-black text-neutral-400">Sèmè City</div>
-          <div class="text-2xl font-black text-neutral-400">APIEX</div>
-          <div class="text-2xl font-black text-neutral-400">AfricInvest</div>
-          <div class="text-2xl font-black text-neutral-400">CanalBox</div>
+        <div class="max-w-4xl mx-auto">
+          <Carousel :items-to-show="4" :wrap-around="true" :autoplay="2000" class="partner-carousel">
+            <Slide v-for="(partner, idx) in partners" :key="idx">
+              <a :href="partner.link" target="_blank" rel="noopener" class="flex flex-col items-center group">
+                <img :src="partner.logo" class="h-16 w-auto object-contain group-hover: transition duration-100" style="max-width:150px;" />              </a>
+            </Slide>
+          </Carousel>
         </div>
       </div>
     </section>
@@ -611,8 +612,43 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { Carousel, Slide } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
+
+// Logos d'exemple libres de droits (à remplacer par les officiels)
+const partners = [
+  {
+    logo: '/partners/anpe.png',
+    link: 'https://anpe.bj',
+  },
+  {
+    logo: '/partners/fda.png',
+    link: 'https://www.facebook.com/fdaBenin/?locale=fr_FR',
+  },
+  {
+    logo: '/partners/cma-benin.png',
+    link: 'https://cmabenin.bj/',
+  },
+  {
+    logo: '/partners/CCI_Bénin.png',
+    link: 'https://www.cci.bj/',
+  },
+  {
+    logo: '/partners/AFD.png',
+    link: 'https://www.afd.fr',
+  },
+  {
+    logo: 'partners/Union Européenne.jpg',
+    link: 'https://europa.eu',
+  },
+  {
+    logo: '/partners/Sèmè City.png',
+    link: 'https://semecity.bj',
+  },
+]
 
 const this_year = () => {
   const this_date = new Date()
@@ -713,6 +749,21 @@ onUnmounted(() => {
   }
 })
 </script>
+<style scoped>
+.partner-carousel {
+  --carousel-slide-width: 160px;
+  --carousel-slide-gap: 2rem;
+}
+.partner-carousel .carousel__slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+.partner-carousel .carousel__track {
+  gap: var(--carousel-slide-gap);
+}
+</style>
 
 <style scoped>
 /* Animations */

@@ -153,7 +153,7 @@
                   <option v-for="p in positions" :key="p.id" :value="p.id">{{ p.nom }}</option>
                 </Select>
 
-                <Select label="Votre titre (optionnel)" v-model="form.title_id">
+                <Select label="Votre titre" v-model="form.title_id">
                   <option value="">-- Sélectionner --</option>
                   <option v-for="t in titles" :key="t.id" :value="t.id">{{ t.nom }}</option>
                 </Select>
@@ -213,7 +213,7 @@
                 </div>
 
                 <!-- Aucun résultat -->
-                <div v-else-if="!searchingStartups" class="text-center py-4 text-sm text-gray-500">
+                <div v-else-if="!searchingStartups && !form.existingStartupId" class="text-center py-4 text-sm text-gray-500">
                   Aucune startup trouvée pour "{{ searchQuery }}"
                 </div>
               </div>
@@ -226,7 +226,7 @@
 
               <!-- Message sélection -->
               <Alert v-if="form.existingStartupId" type="info" class="mt-3">
-                ✓ Startup sélectionnée : <strong>{{ searchQuery }}</strong><br />
+                ✓ Startup sélectionnée : <strong>{{ selectedStartupName }}</strong><br />
                 Une demande d'adhésion sera envoyée aux membres actuels après votre connexion.
               </Alert>
 
@@ -247,6 +247,16 @@
 
           <!-- Step 2 - Partner -->
           <template v-if="step === 2 && form.role === 'partenaire'">
+            <Alert type="info" class="mb-4">
+              <div class="flex items-start gap-2">
+                <Icon name="Info" :size="18" class="text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p class="font-semibold text-blue-900">Validation requise</p>
+                  <p class="text-sm text-blue-800">Votre compte partenaire devra être validé par un administrateur avant
+                    que vous puissiez accéder à toutes les fonctionnalités de la plateforme.</p>
+                </div>
+              </div>
+            </Alert>
             <div class="bg-gray-50 p-4 rounded-lg space-y-4">
               <Input label="Nom de l'organisation" placeholder="Bénin Business Angels" v-model="form.companyName"
                 required />
@@ -263,10 +273,18 @@
               Retour
             </Button>
 
-            <Button type="submit" size="md" class="flex-1" :disabled="submitting">
+            <Button
+              type="submit"
+              size="md"
+              class="flex-1"
+              :disabled="
+                submitting ||
+                (step === 2 && form.role === 'startuper' && form.startupChoice === 'existing' && !form.existingStartupId)
+              "
+            >
               <span class="text-sm sm:text-base">{{
                 submitting ? 'Création...' : step === 2 ? 'Créer mon compte' : 'Continuer'
-                }}</span>
+              }}</span>
             </Button>
           </div>
         </form>
@@ -290,7 +308,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/authStore'
-import { Button, Input, Select, Alert } from '@/components/ui'
+import { Button, Input, Select, Alert, Icon } from '@/components/ui'
 import { getAllCityNames } from '@/utils/beninCities'
 import { useToast } from '@/composables/useToast'
 
@@ -303,6 +321,7 @@ const submitting = ref(false)
 const searchQuery = ref('')
 const startupResults = ref([])
 const searchingStartups = ref(false)
+const selectedStartupName = ref('')
 
 const sectors = ref([])
 const titles = ref([])
@@ -432,6 +451,7 @@ async function onSearchInput() {
 
 function selectStartup(s) {
   form.existingStartupId = s.id
+  selectedStartupName.value = s.name
   searchQuery.value = s.name
   startupResults.value = []
 }

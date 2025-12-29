@@ -54,14 +54,14 @@
             <Card class="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-amber-100 text-sm">Partenaires</p>
+                  <p class="text-amber-100 text-sm">Organisations</p>
                   <p class="text-3xl font-bold">{{ partnersCount }}</p>
                   <p class="text-amber-200 text-xs mt-1">
                     {{ kpis.partners?.active_offers || 0 }} offres actives
                   </p>
                 </div>
                 <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Icon name="Briefcase" :size="24" />
+                  <Icon name="Building" :size="24" />
                 </div>
               </div>
             </Card>
@@ -281,7 +281,7 @@
                       :stroke-dashoffset="2 * Math.PI * 56 * (1 - rccmPercentage / 100)" stroke-linecap="round" />
                   </svg>
                   <span class="absolute text-2xl font-bold text-neutral-900">{{ rccmPercentage
-                    }}%</span>
+                  }}%</span>
                 </div>
                 <p class="text-sm text-neutral-600 mt-2">Startups avec RCCM</p>
               </div>
@@ -290,29 +290,20 @@
                   <span class="text-neutral-600">Avec RCCM</span>
                   <span class="font-semibold text-emerald-600">{{
                     kpis.startups?.with_registre_commerce || 0
-                    }}</span>
+                  }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-neutral-600">Sans RCCM</span>
                   <span class="font-semibold text-neutral-900">{{
                     (kpis.startups?.total || 0) - (kpis.startups?.with_registre_commerce || 0)
-                    }}</span>
+                  }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-neutral-600">Total</span>
                   <span class="font-semibold text-neutral-900">{{
                     kpis.startups?.total || 0
-                    }}</span>
+                  }}</span>
                 </div>
-              </div>
-              <div class="flex flex-col justify-center">
-                <p class="text-sm text-neutral-600 mb-2">
-                  Le RCCM (Registre du Commerce et du Crédit Mobilier) est essentiel pour la
-                  formalisation des entreprises au Bénin.
-                </p>
-                <p class="text-xs text-neutral-500">
-                  ADPME accompagne les startups dans leurs démarches de formalisation.
-                </p>
               </div>
             </div>
           </Card>
@@ -497,8 +488,10 @@ const rccmPercentage = computed(() => {
 
 // Computed to get partners count from users with role partenaire
 const partnersCount = computed(() => {
-  // Utiliser le nombre d'utilisateurs avec le rôle partenaire
-  return kpis.value.users?.partners || kpis.value.users?.by_role?.partenaire || 0
+  // Utiliser le nombre d'organisations (partenaires) pour être cohérent avec la page Partenaires
+  // total_organizations compte les vraies entités partenaires (organisations)
+  // users.partners compte les utilisateurs avec le rôle partenaire (différent)
+  return kpis.value.partners?.total_organizations || 0
 })
 
 // Chart Options

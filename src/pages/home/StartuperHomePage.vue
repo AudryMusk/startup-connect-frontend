@@ -1,14 +1,10 @@
 <template>
   <div class="card-spacing">
-      <!-- Bannière événement à la une  -->
-      <EventBanner
-        v-if="featuredEvent"
-        :eventId="featuredEvent.id"
-        :eventDate="nextEventDate"
-        :eventName="nextEventName"
-        :eventLocation="nextEventLocation"
-        :isLoading="loading"
-      />
+    <!-- Bannière événement à la une  -->
+    <EventBanner v-if="featuredEvent" :eventId="featuredEvent.id" :eventDate="nextEventDate" :eventName="nextEventName"
+      :eventLocation="nextEventLocation"
+      :eventImage="featuredEvent.image || featuredEvent.banner || featuredEvent.cover || featuredEvent.image_url || featuredEvent.banner_url || featuredEvent.cover_url || featuredEvent.photo || (featuredEvent.photos && featuredEvent.photos[0]) || ''"
+      :isLoading="loading" />
     <!-- Mobile: Bouton pour afficher/masquer la sidebar -->
     <div class="lg:hidden flex items-center justify-between mb-3 sm:mb-4">
       <h2 class="text-base sm:text-lg font-bold text-neutral-900">Fil d'actualité</h2>
@@ -24,7 +20,7 @@
     <div v-if="showMobileSidebar"
       class="lg:hidden space-y-3 sm:space-y-4 mb-4 sm:mb-6 p-3 sm:p-4 bg-neutral-50 rounded-xl border border-neutral-200">
       <!-- Event Countdown Mobile -->
-      <EventCountdown :eventDate="nextEventDate" :eventName="nextEventName" :isLoading="loading" />
+      <!-- <EventCountdown :eventDate="nextEventDate" :eventName="nextEventName" :isLoading="loading" /> -->
 
       <!-- Quick Actions Mobile - Version compact -->
       <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
@@ -114,7 +110,7 @@
                   class="w-9 h-9 bg-theme-100 rounded-xl flex items-center justify-center group-hover:bg-theme-200 transition-colors">
                   <Icon name="Search" :size="18" class="text-theme-700" />
                 </div>
-                <span class="flex-1 text-left font-bold">Explorer les opportunités</span>
+                <span class="flex-1 text-left font-bold">Explorer les offres</span>
                 <Icon name="ChevronRight" :size="16"
                   class="text-neutral-400 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -166,7 +162,7 @@
               class="w-8 h-8 bg-gradient-to-br from-theme-400 to-theme-600 rounded-lg flex items-center justify-center">
               <Icon name="MessageSquare" :size="16" class="text-white" />
             </div>
-            Groupe {{ startup?.sector }}
+            Groupe {{ sectorGroup?.name || startup?.sector || 'Sectoriel' }}
           </h3>
           <p v-if="groupMessages.length === 0" class="text-sm text-neutral-500 text-center py-4">
             Aucun message récent dans votre groupe sectoriel
@@ -174,14 +170,15 @@
           <div v-else class="space-y-4">
             <div v-for="msg in groupMessages.slice(0, 3)" :key="msg.id"
               class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 hover:border-neutral-200 transition-colors">
-              <p class="font-bold text-sm text-neutral-900 mb-1">{{ msg.senderName }}</p>
-              <p class="text-sm text-neutral-600 line-clamp-2 mb-2">{{ msg.text }}</p>
+              <p class="font-bold text-sm text-neutral-900 mb-1">{{ msg.sender?.name || msg.senderName || 'Anonyme' }}
+              </p>
+              <p class="text-sm text-neutral-600 line-clamp-2 mb-2">{{ msg.content || msg.text }}</p>
               <p class="text-xs text-neutral-400 font-medium flex items-center gap-1.5">
                 <Icon name="Clock" :size="12" />
-                {{ formatDistanceToNow(msg.createdAt, { addSuffix: true }) }}
+                {{ formatDistanceToNow(msg.sent_at || msg.createdAt, { addSuffix: true }) }}
               </p>
             </div>
-            <router-link to="/messages">
+            <router-link :to="sectorGroup?.id ? `/messages/groups/${sectorGroup.id}` : '/messages'">
               <Button variant="ghost" size="sm" class="w-full group">
                 Voir toutes les discussions
                 <Icon name="ArrowRight" :size="14" class="group-hover:translate-x-1 transition-transform" />
@@ -200,27 +197,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useAuth } from '../../composables/useAuth'
+import { ref, onMounted, computed } from 'vue'
 import { usePostsStore } from '@/stores/postsStore'
 import { useAuthStore } from '@/stores/authStore'
-import postsApi from '../../services/posts'
+import { useGroupsStore } from '@/stores/groupsStore'
 import eventsApi from '../../services/events'
 import { Card, Button, Badge, EmptyState, Icon } from '../../components/ui'
 import PostSkeleton from '@/components/skeletons/PostSkeleton.vue'
-import { PostCard, EventCountdown } from '../../components/feed'
+import { PostCard } from '../../components/feed'
 import EventBanner from '../../components/feed/EventBanner.vue'
 import CreatePostModal from '../../components/modals/CreatePostModal.vue'
 import { formatDistanceToNow } from '../../utils/dateUtils'
 
-const { user } = useAuth()
 const authStore = useAuthStore()
 const postsStore = usePostsStore()
+const groupsStore = useGroupsStore()
 const startup = ref(null)
 const candidaciesCount = ref(0)
-const groupMessages = ref([])
+const sectorGroup = ref(null)
 const loading = ref(true)
 const posts = ref([])
+
+// Messages du groupe sectoriel (computed depuis le store)
+const groupMessages = computed(() => {
+  if (!sectorGroup.value?.id) return []
+  return groupsStore.getMessagesForGroup(sectorGroup.value.id)
+})
 
 // Featured event for banner
 const featuredEvent = ref(null)
@@ -276,10 +278,25 @@ const loadData = async () => {
         location: authStore.user.location || 'Cotonou',
         verified: true,
       }
+
+      // Charger les groupes pour trouver le groupe sectoriel
+      await groupsStore.fetchGroups()
+      const sectorialGroups = groupsStore.sectorialGroups
+
+      // Trouver le groupe sectoriel correspondant au secteur de la startup
+      if (authStore.user.secteur?.id) {
+        sectorGroup.value = sectorialGroups.find(
+          g => g.secteur_id === authStore.user.secteur.id || g.sector === authStore.user.secteur.nom
+        )
+
+        // Charger les messages du groupe sectoriel si trouvé
+        if (sectorGroup.value?.id) {
+          await groupsStore.fetchMessages(sectorGroup.value.id, 1, 5)
+        }
+      }
     }
 
     candidaciesCount.value = 0
-    groupMessages.value = []
   } catch (error) {
     console.error('Error loading data:', error)
   } finally {
@@ -389,7 +406,7 @@ const handleDeletePost = async (postId) => {
   }
 }
 
-const handleReportPost = async (postId) => {
+const handleReportPost = async (/* postId */) => {
   try {
     // TODO: Implémenter l'API de signalement quand disponible
     // Pour l'instant, on affiche un message de succès

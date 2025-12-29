@@ -67,13 +67,20 @@ api.interceptors.response.use(
       }
     }
 
-    // Log des erreurs en développement (sauf 401 répétées)
-    if (import.meta.env.DEV && error.response?.status !== 401) {
-      console.error('API Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
+    // Ne pas spammer la console pour les requêtes abortées (ex: navigation/timeout)
+    const isAborted = error.code === 'ECONNABORTED' || error.message === 'Request aborted' || error.name === 'CanceledError';
+
+    if (import.meta.env.DEV) {
+      if (isAborted) {
+        // debug-level log pour faciliter le triage sans polluer la console d'erreur
+        console.debug('API request aborted:', error.message);
+      } else if (error.response?.status !== 401) {
+        console.error('API Error:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+      }
     }
 
     return Promise.reject(error);

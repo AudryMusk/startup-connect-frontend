@@ -35,8 +35,8 @@
           <div class="flex items-center gap-2 bg-white rounded-lg border border-neutral-200 p-1">
             <button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value"
               class="px-4 py-2 rounded-md text-sm font-medium transition-colors" :class="activeTab === tab.value
-                  ? 'bg-orange-600 text-white'
-                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                ? 'bg-orange-600 text-white'
+                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
                 ">
               {{ tab.label }}
             </button>
@@ -59,10 +59,10 @@
         <!-- Startups List -->
         <div v-if="filteredStartups.length > 0" class="space-y-4">
           <Card v-for="startup in filteredStartups" :key="startup.id" class="border-l-4" :class="getStartupStatus(startup) === 'pending'
-              ? 'border-l-orange-500'
-              : getStartupStatus(startup) === 'validated'
-                ? 'border-l-green-500'
-                : 'border-l-red-500'
+            ? 'border-l-orange-500'
+            : getStartupStatus(startup) === 'validated'
+              ? 'border-l-green-500'
+              : 'border-l-red-500'
             ">
             <div class="flex flex-col lg:flex-row gap-6">
               <!-- Startup Info -->
@@ -76,14 +76,13 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 class="text-lg font-semibold text-neutral-900">{{ startup.name }}</h3>
+                    <h3 class="text-lg font-semibold text-neutral-900">{{ startup.nom || startup.name }}</h3>
                     <Badge :variant="getStatusVariant(getStartupStatus(startup))">
                       {{ getStatusLabel(getStartupStatus(startup)) }}
                     </Badge>
                   </div>
                   <p class="text-sm text-neutral-600 mb-2">
-                    {{ startup.sector || startup.industry || 'Non spécifié' }} • {{ startup.city || startup.location ||
-                    'Non spécifié' }}
+                    {{ getSectorName(startup) }} • {{ startup.emplacement || startup.city || startup.location || 'Non spécifié' }}
                   </p>
 
                   <div class="flex flex-wrap items-center gap-4 text-sm text-neutral-500">
@@ -108,14 +107,15 @@
                 <div class="bg-neutral-50 rounded-lg p-4 mb-4">
                   <p class="text-xs font-medium text-neutral-500 uppercase mb-2">Numéro RCCM</p>
                   <p class="text-lg font-mono font-semibold text-neutral-900">
-                    {{ startup.rccm || startup.registre_commerce || 'Non fourni' }}
+                    {{ startup.registre_commerce_number || startup.rccm || startup.registre_commerce || 'Non fourni' }}
                   </p>
                 </div>
 
                 <!-- Actions -->
                 <div v-if="getStartupStatus(startup) === 'pending'" class="flex flex-col gap-2">
-                  <Button v-if="startup.rccm_document || startup.registre_commerce_pdf" variant="outline" size="sm"
-                    @click="viewDocument(startup)">
+                  <Button
+                    v-if="startup.registre_commerce_pdf_path || startup.rccm_document || startup.registre_commerce_pdf"
+                    variant="outline" size="sm" @click="viewDocument(startup)">
                     <Icon name="FileText" :size="16" class="mr-1" />
                     Voir le document
                   </Button>
@@ -219,13 +219,17 @@
     </div>
 
     <!-- Document Viewer Modal -->
-    <div v-if="showingDocumentModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div v-if="showingDocumentModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      @click.self="closeDocumentModal">
       <Card class="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-neutral-900">Document RCCM - {{ selectedStartupForDoc?.name }}</h3>
-            <button @click="closeDocumentModal" class="text-neutral-400 hover:text-neutral-600">
-              <Icon name="X" :size="20" />
+            <h3 class="text-lg font-semibold text-neutral-900">Document RCCM - {{ selectedStartupForDoc?.nom ||
+              selectedStartupForDoc?.name }}</h3>
+            <button @click="closeDocumentModal"
+              class="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+              title="Fermer">
+              <Icon name="X" :size="24" />
             </button>
           </div>
         </template>
@@ -306,7 +310,8 @@ const filteredStartups = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       (s) =>
-        s.name?.toLowerCase().includes(query) ||
+        (s.nom || s.name)?.toLowerCase().includes(query) ||
+        s.registre_commerce_number?.toLowerCase().includes(query) ||
         s.rccm?.toLowerCase().includes(query) ||
         s.registre_commerce?.toLowerCase().includes(query) ||
         getFounderName(s)?.toLowerCase().includes(query)
@@ -318,18 +323,44 @@ const filteredStartups = computed(() => {
 
 // Methods
 const getStartupStatus = (startup) => {
-  // Check various possible status fields from API
+  // Check if explicitly rejected
+  if (startup.status === 'rejected' || (startup.is_validated === false && startup.rejection_reason)) {
+    return 'rejected'
+  }
+
+  // Check if explicitly validated by admin
   if (startup.is_validated === true || startup.verified === true || startup.status === 'validated') {
     return 'validated'
   }
-  if (startup.is_validated === false && startup.rejection_reason) {
-    return 'rejected'
+
+  // Nouvelle logique métier: Une startup est considérée comme VÉRIFIÉE si:
+  // - Le numéro RCCM est renseigné ET
+  // - Le fichier RCCM est uploadé
+  const hasRccmNumber = !!(startup.registre_commerce_number || startup.rccm || startup.registre_commerce)
+  const hasRccmDocument = !!(startup.registre_commerce_pdf_path || startup.rccm_document || startup.registre_commerce_pdf)
+
+  if (hasRccmNumber && hasRccmDocument) {
+    // Documents complets - en attente de validation admin
+    return 'pending'
   }
-  if (startup.status === 'rejected') {
-    return 'rejected'
-  }
-  // Default to pending if not validated
+
+  // Documents incomplets - non vérifié (considéré comme en attente également)
   return 'pending'
+}
+
+// Fonction pour vérifier si une startup a tous ses documents RCCM
+const isStartupVerified = (startup) => {
+  const hasRccmNumber = !!(startup.registre_commerce_number || startup.rccm || startup.registre_commerce)
+  const hasRccmDocument = !!(startup.registre_commerce_pdf_path || startup.rccm_document || startup.registre_commerce_pdf)
+  return hasRccmNumber && hasRccmDocument
+}
+
+const getSectorName = (startup) => {
+  // Handle both object and string sector formats
+  if (startup.secteur) {
+    return typeof startup.secteur === 'object' ? startup.secteur.nom : startup.secteur
+  }
+  return startup.sector || startup.industry || 'Non spécifié'
 }
 
 const getFounderName = (startup) => {
@@ -387,21 +418,25 @@ const viewDocument = async (startup) => {
   documentUrl.value = null
 
   try {
-    // Try to get the document URL
-    if (startup.rccm_document) {
-      documentUrl.value = startup.rccm_document
-    } else if (startup.registre_commerce_pdf) {
-      documentUrl.value = startup.registre_commerce_pdf
-    } else {
-      // Try to download from admin API
-      const response = await adminApi.downloadRegistreCommerce(startup.id)
-      if (response.data) {
-        documentUrl.value = URL.createObjectURL(response.data)
-      }
+    // Always try to download fresh from admin API to avoid JWT expiration issues
+    const response = await adminApi.downloadRegistreCommerce(startup.id)
+    if (response.data) {
+      documentUrl.value = URL.createObjectURL(response.data)
     }
   } catch (error) {
     console.error('Error loading document:', error)
-    toast.error('Impossible de charger le document')
+
+    // Handle JWT expiration error specifically
+    if (error.response?.data?.error === 'InvalidJWT' ||
+      error.response?.data?.message?.includes('exp') ||
+      error.response?.status === 401) {
+      toast.error('Session expirée. Veuillez vous reconnecter.')
+    } else {
+      toast.error('Impossible de charger le document')
+    }
+
+    // Close modal on error
+    showingDocumentModal.value = false
   } finally {
     documentLoading.value = false
   }

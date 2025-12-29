@@ -83,10 +83,14 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
                                     <h3 class="text-lg font-semibold text-neutral-900">{{ startup.nom }}</h3>
-                                    <Badge v-if="startup.registre_commerce_pdf_path" variant="success"
+                                    <Badge v-if="isStartupVerified(startup)" variant="success"
                                         class="flex items-center gap-1">
                                         <Icon name="CheckCircle" :size="12" />
-                                        RCCM
+                                        Vérifié
+                                    </Badge>
+                                    <Badge v-else variant="warning" class="flex items-center gap-1">
+                                        <Icon name="AlertCircle" :size="12" />
+                                        Non vérifié
                                     </Badge>
                                 </div>
                                 <p class="text-sm text-neutral-600 line-clamp-2 mb-2">
@@ -243,6 +247,16 @@ const filters = ref({
 // Modal
 const showDeleteModal = ref(false)
 const selectedStartup = ref(null)
+
+// Fonction pour vérifier si une startup est vérifiée (RCCM complet)
+// Une startup est considérée comme VÉRIFIÉE si:
+// - Le numéro RCCM est renseigné ET
+// - Le fichier RCCM est uploadé
+const isStartupVerified = (startup) => {
+    const hasRccmNumber = !!(startup.registre_commerce_number || startup.rccm || startup.registre_commerce)
+    const hasRccmDocument = !!(startup.registre_commerce_pdf_path || startup.rccm_document || startup.registre_commerce_pdf)
+    return hasRccmNumber && hasRccmDocument
+}
 const actionLoading = ref(false)
 
 let searchTimeout = null

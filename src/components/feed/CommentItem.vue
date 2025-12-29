@@ -21,8 +21,8 @@ export default {
         <div class="bg-neutral-50 rounded-lg px-3 md:px-4 py-2 md:py-3">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-semibold text-xs md:text-sm text-neutral-900 truncate">{{
-              comment.user?.name || 'Utilisateur'
-              }}</span>
+              commentAuthorName
+            }}</span>
             <span class="text-[10px] md:text-xs text-neutral-400 flex-shrink-0">
               {{ formatDistanceToNow(comment.created_at, { addSuffix: true }) }}
             </span>
@@ -123,6 +123,23 @@ watch(() => props.comment.replies_count, (newVal) => {
 
 const canDelete = computed(() => {
   return authStore.user?.role === 'admin' || authStore.user?.id === props.comment.user?.id
+})
+
+// Computed property pour le nom de l'auteur avec startup/organisation
+const commentAuthorName = computed(() => {
+  const name = props.comment.user?.name || 'Utilisateur'
+
+  // Ajouter le nom de la startup/organisation entre parenthèses si disponible
+  const startupName = props.comment.user?.startup?.nom || props.comment.user?.startup?.name || props.comment.startup?.nom
+  const orgName = props.comment.user?.organization?.name || props.comment.user?.primary_organization?.name || props.comment.organization?.name
+
+  if (startupName) {
+    return `${name} (${startupName})`
+  } else if (orgName) {
+    return `${name} (${orgName})`
+  }
+
+  return name
 })
 
 const getInitials = (name) => {

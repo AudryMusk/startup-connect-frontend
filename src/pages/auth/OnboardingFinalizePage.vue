@@ -77,7 +77,7 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Document RCCM (PDF)
+                  Document RCCM (PDF) <span class="text-gray-400 font-normal">(optionnel)</span>
                 </label>
                 <input
                   ref="rccmInput"
@@ -85,16 +85,25 @@
                   accept=".pdf"
                   @change="onRccmFileChange"
                   class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-theme file:text-white hover:file:bg-theme-hover"
-                required />
-                <p class="text-xs text-gray-400 mt-1">Ce document est strictement confidentiel. Il est utilisé uniquement par nos services pour valider l'existence juridique de votre startup et ne sera jamais publié.</p>
+                />
+                <p class="text-xs text-gray-400 mt-1">
+                  L'upload du RCCM n'est <span class="font-semibold">pas obligatoire</span> à cette étape.<br>
+                  Il permet simplement de confirmer l'existence légale de votre startup. Vous pourrez l'ajouter ou le modifier plus tard depuis la page de gestion de votre startup.<br>
+                  Ce document est strictement confidentiel et ne sera jamais publié.
+                </p>
               </div>
 
               <Textarea label="Description (optionnel)" v-model="startupForm.description"
                 placeholder="Décrivez votre startup, votre mission, vos objectifs..." rows="4" />
 
-              <Button type="submit" class="w-full" :disabled="submitting">
-                {{ submitting ? 'Création en cours...' : 'Créer ma startup' }}
-              </Button>
+              <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                <Button type="submit" class="flex-1" :disabled="submitting">
+                  {{ submitting ? 'Création en cours...' : 'Créer ma startup' }}
+                </Button>
+                <Button type="button" class="flex-1" variant="outline" :disabled="submitting" @click="handleCreateStartup">
+                  Passer cette étape
+                </Button>
+              </div>
             </form>
           </div>
 
